@@ -1,11 +1,12 @@
 import { World } from "../domain/world";
 import { Renderer } from "./renderer";
+import { renderScale } from "../dpr";
+import { colorForHeight, BLOCKED_COLOR } from "../palette";
 
 const TILE_W = 48;
 const TILE_H = 24;
 const STEP_H = 12; // píxeles que sube un escalón de altura
 
-const PALETTE = ["#5a7d3a", "#6b9142", "#7ba34d", "#8cb45a", "#9dc468", "#aed477"];
 
 /**
  * Tiles 2D en proyección isométrica sobre canvas.
@@ -27,7 +28,7 @@ export class Tiles2DRenderer implements Renderer {
   }
 
   resize(): void {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = renderScale();
     this.canvas.width = this.canvas.clientWidth * dpr;
     this.canvas.height = this.canvas.clientHeight * dpr;
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -102,10 +103,10 @@ export class Tiles2DRenderer implements Renderer {
         }
 
         const fill = !cell.walkable
-          ? "#7a4b3a"
+          ? BLOCKED_COLOR
           : onPath.has(y * grid.width + x)
             ? "#e8c46a"
-            : PALETTE[Math.min(cell.height, PALETTE.length - 1)];
+            : colorForHeight(cell.height);
         this.diamond(sx, sy, fill);
       }
     }

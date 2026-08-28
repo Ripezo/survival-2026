@@ -44,6 +44,40 @@ propósito — el objetivo es aislar el coste de la presentación, no juzgar est
 **~261 kB gzip**, y casi todo es Babylon. El renderizador 2D no necesita ninguna
 dependencia. Eso es coste de arranque en móvil, y cuenta en la decisión.
 
+## Fallos encontrados y corregidos (2026-08-28)
+
+Reportado: *"en móvil la vista 3D no responde al tap"*. Al verificarlo en navegador
+aparecieron dos, y el segundo era peor que el reportado.
+
+**1. El terreno entero era invisible.** `thinInstanceAdd()` **no** actualiza el bounding
+box de la malla: se queda siendo el cubo origen de 1×1×1 en (0,0,0). Como ese cubo cae
+fuera del frustum, el culling se llevaba la malla y con ella todas sus instancias — se
+veía solo el actor. Se arregla con `thinInstanceRefreshBoundingInfo(true)`.
+
+**2. El tap no acertaba nunca.** `scene.pick` ignora las thin instances salvo que se
+active `thinInstanceEnablePicking = true` (por defecto `false`). Sin eso, el rayo solo
+se prueba contra la malla origen. El picking usa ahora el **índice de instancia** en vez
+de redondear el punto de impacto: al tocar el lateral de un cubo el punto cae en el borde
+(x.5) y el redondeo es ambiguo.
+
+Ninguno de los dos era específico de móvil. Se notaron ahí porque en escritorio se estaba
+usando el teclado.
+
+### Dos correcciones que invalidaban la comparación
+
+Aparte de los fallos, el spike medía mal:
+
+- **Densidad de píxeles distinta.** El canvas 2D dibujaba a 2× y Babylon a 1×, o sea el
+  2D hacía cuatro veces el trabajo de píxel. Comparar sus fps no medía nada. Ahora ambos
+  usan `src/dpr.ts`, política única.
+- **Sombreado por altura solo en 2D.** El 2D coloreaba cada tile según su altura y el 3D
+  era todo verde plano, así que la pregunta "¿cuál se lee mejor?" venía contaminada.
+  Ahora ambos usan `src/palette.ts`, la misma paleta.
+
+Que los dos fallos fueran de *justicia de la medición* y no de código es lo esperable en
+un benchmark: **lo que invalida una comparación no suele ser un bug, es una asimetría que
+nadie miró.**
+
 ## Estructura
 
 ```
