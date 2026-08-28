@@ -1127,3 +1127,149 @@ Standing rule, independent of this decision:
 
 Forms pair with `react-hook-form` + `zod`. The `zod` schemas are also
 what validates player state (section 24.4).
+
+## 24.8 Art production --- the dominant risk
+
+Recorded 2026-08-28. Sections 8--13 commit the project to modular 3D.
+Nothing in sections 1--23 addresses **who produces that art**, which is
+the largest risk the project carries. It is larger than any engine or
+architecture decision. The code has an answer; the art does not.
+
+### What the project actually has
+
+-   **Art direction capability --- confirmed.** Existing work
+    (multi-view character turnarounds, expression sheets, defined
+    palettes, consistent characters across views) demonstrates coherent
+    art direction produced with AI image tools.
+-   **No modeller, rigger, animator, or toon-shading artist.**
+
+Of those two, art direction is the scarcer skill and the project has it.
+Modelling can be bought, generated or outsourced. This reframes the
+problem from "there is no art" to "there is no *production* capacity".
+
+### Correction to the earlier comparison material
+
+The 3D/2D comparison sheet used in evaluation is **not a reliable cost
+reference**. It labels a render "~1,200 tris / 256×256" while showing
+soft shading, ambient occlusion, cloth folds and individual hair strands
+--- which those numbers do not produce. It also renders the character
+roughly five times larger in linear size than the isometric game camera
+will ever show it.
+
+At true game distance, 1,200 tris and a 256×256 toon texture are
+adequate --- the second reference image (a real gameplay capture) is the
+honest quality target. **Any future look-and-feel evaluation must be
+rendered at real camera distance with real budgets**, never as a
+character sheet.
+
+### 2D is not the cheaper fallback for this team
+
+Retreating to 2D sprites was considered and is **not** the lower-cost
+path under this project's constraints:
+
+-   AI image tools produce excellent *reference sheets* but not
+    *animation frames*; frame-to-frame character coherence across
+    8 directions × N frames is precisely their weakest area;
+-   the combinatorial cost identified in section 8 is unchanged --- every
+    cosmetic × every direction × every frame;
+-   hand-drawn sprite animation requires an animator the project does not
+    have either.
+
+2D is a sideways move into a harder problem, not a step down to an
+easier one.
+
+### Routes available, with honest limits
+
+  ----------------------------------------------------------------------
+  Route              Gives                    Does not give
+  ------------------ ------------------------ --------------------------
+  **AI 3D**          props, environment,      modular cosmetics bound to
+  (Meshy, Tripo)     whole characters;        *this* skeleton with clean
+                     low-poly with            weights --- a generated
+                     controlled poly counts;  garment will not fit the
+                     one-click auto-rig;      shared rig
+                     motion preset libraries
+
+  **Bought modular   stylized modular         a look that is the
+  packs** (Synty,    characters already       project's own
+  Kenney,            rigged on a shared
+  Quaternius)        skeleton --- exactly the
+                     structure section 24.2
+                     describes. Free to ~USD
+                     200
+
+  **Voxel**          the most accessible 3D   compatibility with the
+  (MagicaVoxel)      style for a non-artist;  Wakfu direction in sections
+                     trivially riggable;      5 and 10 --- a **direction
+                     coherent even when       decision, not a technical
+                     crude**                  one**
+
+  **Human artist**   everything               affordability, at present
+  ----------------------------------------------------------------------
+
+Mixamo auto-rigging remains free and applies to any humanoid mesh.
+
+### Rejected: building on a third-party platform
+
+Building the game as content inside another product (Hytale was the
+specific proposal) is **rejected**:
+
+-   it is a game with modding tools, not an engine --- the product would
+    belong to someone else;
+-   it eliminates the browser-first strategy (section 7) entirely, along
+    with the whole accessibility argument;
+-   cosmetic monetization (section 13) becomes impossible without owning
+    the storefront;
+-   platform risk is demonstrated, not hypothetical: that project was
+    cancelled in June 2025 and revived in November 2025 when its founder
+    repurchased it, reaching Early Access on 2026-01-13.
+
+### The escape hatch that makes 3D the safe choice
+
+**3D authoring can always be pre-rendered to 2D sprites. 2D pixel art
+cannot be converted into 3D models.** (Diablo II shipped exactly this
+way.)
+
+If mobile performance or art production ever forces a retreat to 2D, a
+3D pipeline survives the retreat and the art does not have to be remade.
+This asymmetry --- not the cosmetic-cost argument of section 8 --- is the
+strongest justification for the 3D decision. **The 3D choice is the
+reversible one.**
+
+Note that pre-rendering permanently freezes the camera, which conflicts
+with section 24.5. It is an emergency exit, not a plan.
+
+### OPEN --- device floor
+
+Browser delivery reaches PC and mobile quickly for 2D. For 3D it does
+so **with conditions**: WebGL on mid-and-low-range Android is fragile
+(texture memory limits, thermal throttling, battery), and touch controls
+with isometric UI density on a 6-inch screen is a design problem in its
+own right.
+
+The project must choose a **minimum supported device** and treat it as a
+product target. Per 24.1 this is the creator's decision, not Claude
+Code's. Until it is made, the standing technical requirement is: **test
+on a real mid-range phone from the first mock-up**, not at the end.
+
+### Decision --- defer the art strategy, do not let it block
+
+The first milestone (section 20) asks *"is managing resources in this
+world fun?"*. That question is answerable **with capsules and
+cylinders**. Section 24.2 already isolates the body mesh from the
+domain, the camera and the economy, so the art can be replaced later
+without touching them.
+
+Therefore:
+
+1.  build the mock-up with free pre-rigged assets (Quaternius, Kenney)
+    --- zero cost, zero blocking;
+2.  spend one session running a single character through an AI low-poly
+    + auto-rig pipeline into Babylon --- one afternoon of evidence beats
+    weeks of deliberation about whether the pipeline is viable;
+3.  answer the fun question;
+4.  decide the art strategy afterwards, with a playable prototype in
+    hand and better tooling than exists today.
+
+The art decision is currently being made far earlier than anything
+actually requires.
