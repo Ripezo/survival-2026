@@ -1,0 +1,36 @@
+# Dependencias
+node_modules/
+.pnp
+.pnp.js
+
+# Build
+dist/
+dist-ssr/
+build/
+*.local
+
+# Entorno — nunca subir secretos
+.env
+.env.*
+!.env.example
+
+# Caché de herramientas
+.vite/
+.turbo/
+*.tsbuildinfo
+
+# Tests
+coverage/
+
+# Assets: fuentes de autoría (.blend) fuera del repo de código.
+# Solo se versionan los exportados (glTF/GLB). Ver CLAUDE.md §24.2.
+*.blend
+*.blend1
+
+# Editores
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# macOS
+.DS_Store
