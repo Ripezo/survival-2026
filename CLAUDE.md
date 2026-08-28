@@ -837,23 +837,180 @@ The rule from section 1 stands, and cuts both ways:
 -   if a design decision carries a large technical cost, that cost is
     put on the table with a number, not silently absorbed.
 
-## 24.2 Rig convention --- technical debt, authority granted
+## 24.2 Rig convention --- CLOSED, skeleton version 1
 
-The strategic case for 3D (sections 8, 12, 13) rests entirely on modular
-avatars working. Nothing currently governs what makes them work.
+Closed 2026-08-28 under the authority granted in 24.1. The strategic case
+for 3D (sections 8, 12, 13) rests entirely on modular avatars working.
+This is what makes them work.
 
-Deferred, but **must be settled before the first avatar is authored, not
-after**. A rig convention chosen late is among the most expensive things
-to change in a project of this kind.
+**These decisions are frozen.** Changing them is a `skeletonVersion`
+bump, which is a deliberate reviewed act, not an edit.
 
-Scope of the pending decision:
+### Format
 
--   interchange format (glTF/GLB assumed, to be confirmed);
--   one shared humanoid skeleton, frozen, with bone and socket naming as
-    a hard convention;
--   Blender → export → validation pipeline;
--   how a new cosmetic is verified against existing animations;
--   material/color variant system (the Forest Hat example in section 13).
+-   **glTF 2.0 / `.glb`** (binary, one file per asset). `.gltf` JSON is
+    never shipped.
+-   `.blend` files are the authoring source and stay **out of the code
+    repository** (already in `.gitignore`).
+-   Mesh compression (Meshopt) and texture compression (KTX2/Basis) are
+    **pipeline stages that exist but start disabled**. Turn them on when
+    an asset budget demands it, not before (section 24.6).
+
+### Units, orientation, rest pose
+
+-   1 unit = 1 metre. Scale applied before export --- every exported
+    object is at scale `(1,1,1)`.
+-   Origin **between the feet, at world zero**.
+-   Rest pose is a **T-pose**. A-pose deforms shoulders better on
+    stylized proportions, but T-pose is what every retargeting tool
+    assumes, and free animation libraries are worth more than marginal
+    shoulder quality during the mock-up phase.
+-   Author in Blender's axis convention and let the exporter convert.
+    **Orientation is never corrected with a rotation in code** --- it is
+    corrected in the source file. A rotation offset in the loader is the
+    beginning of a pipeline nobody can reason about.
+
+### The skeleton --- frozen bone list
+
+One shared humanoid skeleton. Every body and every deforming garment
+binds to *this* skeleton, unchanged.
+
+Names follow the Mixamo/standard humanoid convention **with the
+`mixamorig:` prefix stripped**. The convention buys compatibility with
+retargeting tools and free animation libraries; the prefix buys nothing
+and its colon breaks some tooling.
+
+```text
+Root                      (motion root, at origin — enables root motion)
+└── Hips
+    ├── Spine → Spine1 → Spine2
+    │   ├── Neck → Head → HeadTop_End
+    │   ├── LeftShoulder  → LeftArm  → LeftForeArm  → LeftHand
+    │   └── RightShoulder → RightArm → RightForeArm → RightHand
+    ├── LeftUpLeg  → LeftLeg  → LeftFoot  → LeftToeBase  → LeftToe_End
+    └── RightUpLeg → RightLeg → RightFoot → RightToeBase → RightToe_End
+```
+
+26 bones. `HeadTop_End` and `*Toe_End` are leaf orientation helpers kept
+for retargeting compatibility and **carry no vertex weights**.
+
+**No finger bones in version 1.** A full hand rig is 40 bones for
+something the isometric camera renders at a handful of pixels. Fingers
+are a leaf-only addition, which is backward compatible with existing
+weighted assets, so this is deferred without cost. Revisit only if a
+close-up profile or shop view demands it.
+
+Hard limits:
+
+-   **maximum 4 bone influences per vertex**, a single `JOINTS_0` set;
+-   deform bone count stays under 64.
+
+### Sockets --- rigid attachment points
+
+Sockets are bones that exist only as attachment points. They are named
+`SKT_*` and **must never appear in any vertex weight**; the validator
+enforces this.
+
+```text
+SKT_Head    SKT_Face    SKT_Back
+SKT_HandL   SKT_HandR   SKT_HipL   SKT_HipR
+```
+
+Rigid items parent to a socket rather than to a deform bone directly, so
+an artist can move an attachment point in Blender without touching the
+deform skeleton, and the offset lives in the rig instead of as a magic
+number in code.
+
+### Slots and attach modes
+
+  ----------------------------------------------------------------------
+  Slot            Mode      Anchor / notes
+  --------------- --------- --------------------------------------------
+  body            skinned   base mesh, split into regions (below)
+
+  hair            rigid     `SKT_Head`
+
+  headwear        rigid     `SKT_Head`
+
+  face            rigid     `SKT_Face`
+
+  torso           skinned
+
+  hands           skinned
+
+  legs            skinned
+
+  feet            skinned   deforms at the ankle
+
+  back            rigid     `SKT_Back` — capes stay rigid in v1;
+                            skinning or simulation is a later decision
+
+  held            rigid     `SKT_HandL` / `SKT_HandR`
+
+  fx              rigid     any socket, declared per item
+
+  pet             none      a separate entity that follows the avatar,
+                            never parented to its skeleton
+  ----------------------------------------------------------------------
+
+### Body regions and clipping
+
+Clipping is solved by **hiding what a garment covers**, not by modelling
+a new body per outfit. The body is authored as separate named meshes:
+
+```text
+Head  Neck  Torso
+ArmUpper.L/R  ArmLower.L/R  Hand.L/R
+LegUpper.L/R  LegLower.L/R  Foot.L/R
+```
+
+Each cosmetic declares the regions it hides. At runtime hiding is
+`setEnabled(false)` --- no geometry work. This costs draw calls, which is
+acceptable at mock-up scale and can be merged later if profiling says so.
+
+### Colour variants --- one geometry, many looks
+
+Section 13 requires that one asset produce multiple visual variants
+(the Forest Hat: primary / accent / feather). Implementation:
+
+-   a **tint mask texture** whose R, G and B channels select which of
+    three tint parameters applies to each texel;
+-   the toon material exposes `tintPrimary`, `tintAccent`, `tintDetail`.
+
+One geometry, one mask, unlimited colourways, and no extra draw call.
+This is what makes a seasonal cosmetic cheap to produce.
+
+### Catalogue entry
+
+Cosmetics are catalogue entries, which is what appearance state
+references by ID (section 24.4). Shape:
+
+``` text
+id, slot, mesh (glb path), attach ("skinned" | socket name),
+hides [regions], tintChannels, skeletonVersion
+```
+
+Validated with `zod` --- the same schemas that validate player state
+(sections 24.4, 24.7).
+
+### Enforcement
+
+A convention nobody checks is a convention that decays. Two artefacts,
+to be built before the first avatar is authored:
+
+1.  **`skeleton.manifest.json`** --- the frozen bone list, socket list,
+    body regions and `skeletonVersion`. The single source of truth. Every
+    exported `.glb` is stamped with its `skeletonVersion` in glTF
+    `extras`.
+2.  **A validator** run in CI and pre-commit, which rejects any `.glb`
+    that: renames, adds or drops a bone relative to the manifest; puts a
+    weight on an `SKT_*` bone or a leaf helper; exceeds 4 influences per
+    vertex; is not at scale 1; declares a `hides` region that does not
+    exist; or mixes `skeletonVersion`s.
+
+The version stamp is what makes "frozen" survivable: if the skeleton ever
+must change, it bumps, and the validator refuses to mix generations
+instead of failing silently at runtime.
 
 ## 24.3 Game domain must be isomorphic --- accepted
 
