@@ -34,3 +34,6 @@ coverage/
 
 # macOS
 .DS_Store
+
+# Spikes
+spikes/*/dist/

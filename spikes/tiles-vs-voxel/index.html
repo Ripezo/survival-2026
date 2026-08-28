@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Spike — tiles 2D vs cubos 3D</title>
+    <style>
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #1b2430;
+        font-family: ui-sans-serif, system-ui, sans-serif; -webkit-text-size-adjust: 100%; }
+      #stage { position: fixed; inset: 0; }
+      #stage canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+      .hud { position: fixed; top: env(safe-area-inset-top, 0px); left: 0; right: 0;
+        display: flex; gap: 14px; flex-wrap: wrap; padding: 10px 14px;
+        background: rgba(10, 15, 22, .72); color: #d7e2ee;
+        font-size: 13px; font-variant-numeric: tabular-nums; pointer-events: none; }
+      .hud strong { color: #e8c46a; }
+      #toggle { position: fixed; left: 50%; transform: translateX(-50%);
+        bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+        padding: 14px 26px; border: 0; border-radius: 999px;
+        background: #e8c46a; color: #1b2430; font-size: 15px; font-weight: 600;
+        cursor: pointer; touch-action: manipulation; }
+      #help { position: fixed; left: 0; right: 0;
+        bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+        text-align: center; color: #7f93a8; font-size: 12px; pointer-events: none; }
+    </style>
+  </head>
+  <body>
+    <div id="stage"></div>
+    <p id="help">Tap o clic para caminar (A*) · teclado WASD / flechas</p>
+    <button id="toggle">Ver en 3D →</button>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
