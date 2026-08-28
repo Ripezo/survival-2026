@@ -1130,22 +1130,55 @@ what validates player state (section 24.4).
 
 ## 24.8 Art production --- the dominant risk
 
-Recorded 2026-08-28. Sections 8--13 commit the project to modular 3D.
-Nothing in sections 1--23 addresses **who produces that art**, which is
-the largest risk the project carries. It is larger than any engine or
-architecture decision. The code has an answer; the art does not.
+Recorded 2026-08-28. **Revised 2026-08-28** after the creator corrected
+the record: see the capability section below. The original entry assumed
+a skills gap that does not exist, and the correction changes which
+solutions apply.
 
-### What the project actually has
+Sections 8--13 commit the project to modular 3D. Nothing in sections
+1--23 addresses **who sustains that art production**, which is the
+largest risk the project carries --- larger than any engine or
+architecture decision.
 
--   **Art direction capability --- confirmed.** Existing work
-    (multi-view character turnarounds, expression sheets, defined
-    palettes, consistent characters across views) demonstrates coherent
-    art direction produced with AI image tools.
--   **No modeller, rigger, animator, or toon-shading artist.**
+### What the project actually has --- corrected
 
-Of those two, art direction is the scarcer skill and the project has it.
-Modelling can be bought, generated or outsourced. This reframes the
-problem from "there is no art" to "there is no *production* capacity".
+An earlier version of this section stated "no modeller, rigger,
+animator". **That was wrong.** The creator is formally trained in
+modelling, rigging and animation.
+
+What the project has:
+
+-   **Art direction --- confirmed.** Multi-view character turnarounds,
+    expression sheets, defined palettes, characters kept consistent
+    across views, produced with AI image tools.
+-   **Modelling, rigging and animation --- confirmed**, by training.
+
+What the project lacks is **neither of those**. It lacks *throughput*:
+one person, over years, alongside everything else the project needs.
+The creator's stated concern is precise and worth quoting in substance
+--- they know exactly how much work is ahead **because** they have done
+it before.
+
+**This distinction decides which solutions are valid**, and the original
+entry got it backwards:
+
+  ------------------------------------------------------------------
+  If the gap were...        The answer would be...
+  ------------------------- ----------------------------------------
+  **Capability**            hire, buy, outsource, generate --- find
+  (assumed, and wrong)      someone or something able to make it
+
+  **Throughput**            reduce how much must be authored at all;
+  (actual)                  automate production from a single
+                            authored source; choose a style with a
+                            lower per-asset cost
+  ------------------------------------------------------------------
+
+Buying a modular pack or generating meshes with AI answers a capability
+gap. Neither answers a throughput gap by much --- both still require a
+trained person to integrate, retopologise, re-rig to the manifest and
+maintain the result. Solutions must be judged against **authored assets
+per shipped cosmetic**, not against "can this be made at all".
 
 ### Correction to the earlier comparison material
 
@@ -1162,21 +1195,29 @@ honest quality target. **Any future look-and-feel evaluation must be
 rendered at real camera distance with real budgets**, never as a
 character sheet.
 
-### 2D is not the cheaper fallback for this team
+### 2D: it depends entirely on where the sprites come from
 
-Retreating to 2D sprites was considered and is **not** the lower-cost
-path under this project's constraints:
+Retreating to 2D was considered. The answer splits, and the split is the
+whole point:
+
+**AI-generated sprites --- rejected.** Not viable, and not for lack of
+quality:
 
 -   AI image tools produce excellent *reference sheets* but not
-    *animation frames*; frame-to-frame character coherence across
-    8 directions × N frames is precisely their weakest area;
--   the combinatorial cost identified in section 8 is unchanged --- every
-    cosmetic × every direction × every frame;
--   hand-drawn sprite animation requires an animator the project does not
-    have either.
+    *animation frames*; frame-to-frame coherence across 8 directions ×
+    N frames is precisely their weakest area;
+-   the combinatorial cost of section 8 is unchanged --- every cosmetic ×
+    every direction × every frame, each one a fresh generation that may
+    not match its neighbours.
 
-2D is a sideways move into a harder problem, not a step down to an
-easier one.
+This route is a sideways move into a harder problem, not a step down to
+an easier one.
+
+**Sprites pre-rendered from the project's own 3D --- viable, and
+strong.** Same output format, completely different economics. See
+"Pre-rendering 3D to sprites" below.
+
+The instinct toward 2D is sound. The mistake is only in the source.
 
 ### Routes available, with honest limits
 
@@ -1198,16 +1239,34 @@ easier one.
                      describes. Free to ~USD
                      200
 
-  **Voxel**          the most accessible 3D   compatibility with the
-  (MagicaVoxel)      style for a non-artist;  Wakfu direction in sections
-                     trivially riggable;      5 and 10 --- a **direction
-                     coherent even when       decision, not a technical
-                     crude**                  one**
+  **Voxel**          the lowest per-asset     compatibility with the
+  (MagicaVoxel)      authoring cost of any    Wakfu direction in sections
+                     3D style, and the        5 and 10 --- a **direction
+                     creator can execute it   decision, not a technical
+                     well. Under a            one**
+                     *throughput* constraint
+                     this is the strongest
+                     entry in this table
 
-  **Human artist**   everything               affordability, at present
+  **Pre-render to    modular reuse at build   camera freedom --- it
+  sprites**          time; frame coherence    permanently freezes the
+                     for free; uses exactly   camera against section 24.5
+                     the skills available
+
+  **Hiring**         throughput               affordability, at present
   ----------------------------------------------------------------------
 
 Mixamo auto-rigging remains free and applies to any humanoid mesh.
+
+**How to read this table after the correction:** every row must be judged
+by how much it reduces *authored assets per shipped cosmetic*, not by
+whether it can produce an asset at all. AI generation and bought packs
+score well on capability and only moderately on throughput --- both still
+require a trained person to retopologise, re-rig to the manifest and
+maintain the result. Models pulled from an AI gallery are **base meshes,
+not final assets**: check the pose (anything not in T-pose is materially
+more expensive to rig) and check the licence before investing time,
+especially with cosmetic monetization in the plan.
 
 ### Rejected: building on a third-party platform
 
@@ -1224,20 +1283,38 @@ specific proposal) is **rejected**:
     cancelled in June 2025 and revived in November 2025 when its founder
     repurchased it, reaching Early Access on 2026-01-13.
 
-### The escape hatch that makes 3D the safe choice
+### Pre-rendering 3D to sprites --- promoted to a first-class option
 
 **3D authoring can always be pre-rendered to 2D sprites. 2D pixel art
 cannot be converted into 3D models.** (Diablo II shipped exactly this
 way.)
 
-If mobile performance or art production ever forces a retreat to 2D, a
-3D pipeline survives the retreat and the art does not have to be remade.
 This asymmetry --- not the cosmetic-cost argument of section 8 --- is the
 strongest justification for the 3D decision. **The 3D choice is the
 reversible one.**
 
-Note that pre-rendering permanently freezes the camera, which conflicts
-with section 24.5. It is an emergency exit, not a plan.
+The original entry filed this as an emergency exit. Under the corrected
+capability picture it is **a first-class option**, because it is the
+best available answer to a *throughput* problem:
+
+-   it needs exactly the skills the creator has --- model once, rig
+    once, animate once;
+-   the expensive part, producing 8 directions × N frames × every
+    cosmetic, becomes **a build step, not authoring work**;
+-   frame-to-frame coherence is free, because it is a render rather than
+    a generation. This is precisely what AI sprite generation cannot do,
+    and the reason "just ask the AI for a sprite sheet" fails: AI
+    produces excellent single views and cannot hold a character stable
+    across the frames of a walk cycle;
+-   **modular reuse survives.** A hat modelled once is rendered into
+    every direction and frame automatically. Choosing sprites this way
+    does not mean giving up reuse --- it moves reuse from runtime to
+    build time.
+
+Cost, stated honestly: pre-rendering **permanently freezes the camera**,
+which contradicts section 24.5, and every added direction or animation
+multiplies output size. It is a real decision with a real price, not a
+free win.
 
 ### OPEN --- device floor
 
@@ -1273,3 +1350,18 @@ Therefore:
 
 The art decision is currently being made far earlier than anything
 actually requires.
+
+**Revision note.** Steps 1 and 2 above were written to answer a
+capability gap that does not exist. They remain useful --- free rigged
+assets still unblock the mock-up at zero cost, and one afternoon of AI
+pipeline testing is still cheap evidence --- but they are no longer the
+point. The real question is now:
+
+> Which route produces the most shipped cosmetics per authored asset,
+> using skills the creator already has?
+
+On current evidence the two leading candidates are **voxel** and
+**pre-rendering 3D to sprites**, and they are not mutually exclusive.
+Neither is decided; both should be judged with a prototype in hand
+rather than in the abstract. Spike `spikes/tiles-vs-voxel/` exists to
+supply the first piece of that evidence.
